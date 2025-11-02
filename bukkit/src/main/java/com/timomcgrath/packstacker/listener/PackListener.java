@@ -20,6 +20,7 @@ package com.timomcgrath.packstacker.listener;
 
 import com.timomcgrath.packstacker.PackStackerUtil;
 import com.timomcgrath.packstacker.PlayerPackCache;
+import com.timomcgrath.packstacker.GeyserDetector;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,6 +33,11 @@ public class PackListener implements Listener {
   public void onPlayerJoin(PlayerJoinEvent event) {
     Player player = event.getPlayer();
     PlayerPackCache.getInstance().initPlayer(player.getUniqueId());
+
+    // Don't send resource packs to Geyser (Bedrock) players - they don't support Java resource packs
+    if (GeyserDetector.isGeyserPlayer(player)) {
+      return;
+    }
 
     PackStackerUtil.loadMultiple(player, player.getUniqueId(), PackStackerUtil.getPacksToLoadOnJoin());
   }
