@@ -8,12 +8,22 @@ repositories {
         name = "sonatype"
         url = 'https://oss.sonatype.org/content/groups/public/'
     }
+    maven {
+        name = "opencollab-repo-snapshot"
+        url = 'https://repo.opencollab.dev/maven-snapshots/'
+    }
+    maven {
+        name = "opencollab-repo-release"
+        url = 'https://repo.opencollab.dev/maven-releases/'
+    }
 }
 
 dependencies {
     implementation project(':common')
     compileOnly 'io.papermc.paper:paper-api:1.20.6-R0.1-SNAPSHOT'
     compileOnly 'ninja.leaping.configurate:configurate-core:3.7.1'
+    compileOnly 'org.geysermc.geyser:api:2.2.0-SNAPSHOT'
+    compileOnly 'org.geysermc.floodgate:api:2.2.0-SNAPSHOT'
 }
 
 processResources {

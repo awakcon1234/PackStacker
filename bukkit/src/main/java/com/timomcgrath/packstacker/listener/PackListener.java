@@ -21,6 +21,9 @@ package com.timomcgrath.packstacker.listener;
 import com.timomcgrath.packstacker.PackStackerUtil;
 import com.timomcgrath.packstacker.PlayerPackCache;
 import com.timomcgrath.packstacker.GeyserDetector;
+import com.timomcgrath.packstacker.AbstractResourcePack;
+import org.bukkit.Bukkit;
+import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,14 +35,35 @@ public class PackListener implements Listener {
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
     Player player = event.getPlayer();
+    Bukkit.getLogger().info("PackListener: Player join: " + player.getName() + " (" + player.getUniqueId() + ")");
     PlayerPackCache.getInstance().initPlayer(player.getUniqueId());
 
-    // Don't send resource packs to Geyser (Bedrock) players - they don't support Java resource packs
-    if (GeyserDetector.isGeyserPlayer(player)) {
+    boolean isGeyser = false;
+    try {
+      isGeyser = GeyserDetector.isGeyserPlayer(player);
+    } catch (Throwable t) {
+      Bukkit.getLogger().warning("PackListener: Geyser detection threw an exception for player " + player.getName() + ": " + t);
+    }
+
+    if (isGeyser) {
+      Bukkit.getLogger().info("PackListener: Skipping resource pack send for Geyser/BEDROCK player " + player.getName());
       return;
     }
 
-    PackStackerUtil.loadMultiple(player, player.getUniqueId(), PackStackerUtil.getPacksToLoadOnJoin());
+    List<AbstractResourcePack> packs = PackStackerUtil.getPacksToLoadOnJoin();
+    if (packs == null || packs.isEmpty()) {
+      Bukkit.getLogger().info("PackListener: No packs to load on join for player " + player.getName());
+      return;
+    }
+
+    StringBuilder names = new StringBuilder();
+    for (AbstractResourcePack p : packs) {
+      if (names.length() > 0) names.append(", ");
+      names.append(p.getName());
+    }
+    Bukkit.getLogger().info("PackListener: Sending " + packs.size() + " pack(s) to player " + player.getName() + ": " + names.toString());
+
+    PackStackerUtil.loadMultiple(player, player.getUniqueId(), packs);
   }
 
   @EventHandler

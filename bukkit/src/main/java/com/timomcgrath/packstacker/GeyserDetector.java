@@ -20,67 +20,42 @@ package com.timomcgrath.packstacker;
 
 import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
+import org.geysermc.geyser.api.GeyserApi;
+import org.geysermc.floodgate.api.FloodgateApi;
 
-import java.lang.reflect.Method;
 import java.util.UUID;
 
 /**
- * Utility to detect players connecting via Geyser/Floodgate without
- * hard dependency on their APIs by using reflection. Returns true if
- * the player is a Bedrock/Geyser player and should be ignored.
+ * Simple utility to detect players connecting via Geyser/Floodgate.
+ * Returns true if the player is a Bedrock player and should be ignored.
  */
 public final class GeyserDetector {
 
-  private GeyserDetector() {}
-
-  public static boolean isGeyserPlayer(Player player) {
-    if (player == null) return false;
-    UUID uuid = player.getUniqueId();
-
-    // Try Floodgate API: org.geysermc.floodgate.api.FloodgateApi.getInstance().isFloodgatePlayer(UUID)
-    try {
-      Class<?> floodgateClass = Class.forName("org.geysermc.floodgate.api.FloodgateApi");
-      Method getInstance = floodgateClass.getMethod("getInstance");
-      Object fgApi = getInstance.invoke(null);
-      Method isFg = fgApi.getClass().getMethod("isFloodgatePlayer", UUID.class);
-      Object result = isFg.invoke(fgApi, uuid);
-      if (result instanceof Boolean && (Boolean) result) {
-        return true;
-      }
-    } catch (ClassNotFoundException e) {
-      // Floodgate not present - ignore
-    } catch (ReflectiveOperationException e) {
-      // API present but call failed - log debug and continue
-      Bukkit.getLogger().fine("GeyserDetector: Floodgate reflection failed: " + e.getMessage());
-    }
-
-    // Try Geyser API: org.geysermc.geyser.api.GeyserApi.getInstance().isBedrockPlayer(UUID)
-    try {
-      Class<?> geyserClass = Class.forName("org.geysermc.geyser.api.GeyserApi");
-      Method getInstance = geyserClass.getMethod("getInstance");
-      Object geyserApi = getInstance.invoke(null);
-      // Method name historically 'isBedrockPlayer', try that first
-      try {
-        Method isBedrock = geyserApi.getClass().getMethod("isBedrockPlayer", UUID.class);
-        Object result = isBedrock.invoke(geyserApi, uuid);
-        if (result instanceof Boolean && (Boolean) result) {
-          return true;
-        }
-      } catch (NoSuchMethodException inner) {
-        // Fallbacks: some versions expose player lookup - try getPlayerByUuid(UUID) returning Optional/Player
+    public static boolean isGeyserPlayer(Player player) {
+        if (player == null) return false;
+        UUID uuid = player.getUniqueId();
+        
+        // First try Geyser's API
         try {
-          Method getPlayerByUuid = geyserApi.getClass().getMethod("playerByUuid", UUID.class);
-          Object p = getPlayerByUuid.invoke(geyserApi, uuid);
-          if (p != null) return true;
-  } catch (ReflectiveOperationException ignored) {
+            if (GeyserApi.api().isBedrockPlayer(uuid)) {
+                Bukkit.getLogger().info("GeyserDetector: Player " + player.getName() + " is a Bedrock player (via GeyserApi)");
+                return true;
+            }
+        } catch (Exception ignored) {
+            // Geyser not present or unavailable
         }
-      }
-    } catch (ClassNotFoundException e) {
-      // Geyser not present
-    } catch (ReflectiveOperationException e) {
-      Bukkit.getLogger().fine("GeyserDetector: Geyser reflection failed: " + e.getMessage());
-    }
 
-    return false;
-  }
+        // Fallback to Floodgate
+        try {
+            FloodgateApi floodgate = FloodgateApi.getInstance();
+            if (floodgate.isFloodgatePlayer(uuid) || floodgate.isFloodgateId(uuid)) {
+                Bukkit.getLogger().info("GeyserDetector: Player " + player.getName() + " is a Bedrock player (via FloodgateApi)");
+                return true;
+            }
+        } catch (Exception ignored) {
+            // Floodgate not present or unavailable
+        }
+
+        return false;
+    }
 }

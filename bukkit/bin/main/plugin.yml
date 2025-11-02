@@ -3,6 +3,7 @@ version: ${version}
 author: tlm920
 main: com.timomcgrath.packstacker.PackStacker
 api-version: '1.20.2'
+softdepend: [Geyser-Spigot, floodgate]
 commands:
   pack:
     usage: '/pack'
