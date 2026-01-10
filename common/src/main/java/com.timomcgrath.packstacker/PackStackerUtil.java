@@ -35,10 +35,17 @@ public class PackStackerUtil {
      * @return if the pack was found and requested to load to client
      */
     public static boolean loadByName(Audience audience, UUID playerId, String name) {
+        return loadByName(audience, playerId, name, null);
+    }
+
+    public static boolean loadByName(Audience audience, UUID playerId, String name, java.util.function.Consumer<AbstractResourcePack> onFound) {
         PackCache packCache = PackCache.getInstance();
         AbstractResourcePack resourcePack = packCache.get(name);
 
         if (resourcePack != null) {
+            if (onFound != null) {
+                onFound.accept(resourcePack);
+            }
             resourcePack.load(audience, playerId);
             return true;
         }
@@ -52,9 +59,9 @@ public class PackStackerUtil {
      * @param playerId
      * @param packs
      */
-    public static void loadMultiple(Audience audience, UUID playerId, List<AbstractResourcePack> packs) {
+    public static List<AbstractResourcePack> loadMultiple(Audience audience, UUID playerId, List<AbstractResourcePack> packs) {
         if (packs.isEmpty())
-            return;
+            return List.of();
 
         PackPlayer packPlayer = PlayerPackCache.getInstance().getPlayer(playerId);
         packs.sort(new PackStackerUtil.PackComparator());
@@ -62,7 +69,7 @@ public class PackStackerUtil {
         packs = packs.stream().filter(pack -> !packPlayer.hasPack(pack)).toList();
 
         if (packs.isEmpty())
-            return;
+            return List.of();
 
         packs.forEach(pack -> packInfos.add(pack.getPackInfo()));
         AbstractResourcePack first = packs.get(0);
@@ -71,6 +78,8 @@ public class PackStackerUtil {
                 .packs(packInfos).prompt(first.getPrompt())
                 .build().callback((uuid, status, aud) -> first.packCallback(uuid, status, aud, playerId));
         audience.sendResourcePacks(request);
+        request.callback();
+        return packs;
     }
 
     /**

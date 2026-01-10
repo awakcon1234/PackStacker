@@ -30,6 +30,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import com.timomcgrath.packstacker.PlayerProtectionManager;
+
 public class PackCommand extends AbstractPackCommand implements CommandExecutor, TabExecutor {
 
   protected PackCommand(PackPlugin plugin) {
@@ -63,7 +65,9 @@ public class PackCommand extends AbstractPackCommand implements CommandExecutor,
             return;
           }
 
-          if (!PackStackerUtil.loadByName(player, player.getUniqueId(), arg))
+          boolean loaded = PackStackerUtil.loadByName(player, player.getUniqueId(), arg,
+                  pack -> PlayerProtectionManager.getInstance().beginProtection(player, List.of(pack)));
+          if (!loaded)
             Messaging.sendMsg(sender, "invalid_pack", arg);
         } else
           Messaging.sendMsg(sender, "player_not_verbose");
@@ -78,10 +82,11 @@ public class PackCommand extends AbstractPackCommand implements CommandExecutor,
 
         Player player = Bukkit.getPlayer(args[1].toLowerCase());
         if (player != null) {
-          if (!PackStackerUtil.loadByName(player, player.getUniqueId(), arg))
+          boolean loaded = PackStackerUtil.loadByName(player, player.getUniqueId(), arg,
+                  pack -> PlayerProtectionManager.getInstance().beginProtection(player, List.of(pack)));
+          if (!loaded)
             Messaging.sendMsg(sender, "invalid_pack", arg);
-        }
-        else
+        } else
           Messaging.sendMsg(sender, "player_not_online", args[1]);
       }
       default -> Messaging.sendMsg(sender, "pack_help");

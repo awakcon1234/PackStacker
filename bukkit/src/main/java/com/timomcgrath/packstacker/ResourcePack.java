@@ -25,6 +25,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
+import com.timomcgrath.packstacker.PlayerProtectionManager;
 
 public class ResourcePack extends AbstractResourcePack {
     public ResourcePack(PackPlugin plugin, String name, String hash, Component prompt, String url, byte priority, boolean isRequired, boolean loadOnJoin) {
@@ -60,5 +61,7 @@ public class ResourcePack extends AbstractResourcePack {
                 if (pack.isRequired() && !player.hasPermission("pack.bypass"))
                     player.kick(Messaging.get("pack_req_kick"));
         }
+
+        PlayerProtectionManager.getInstance().onPackProcessed(playerId, packId);
     }
 }

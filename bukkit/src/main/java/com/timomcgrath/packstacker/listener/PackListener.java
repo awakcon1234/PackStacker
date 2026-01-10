@@ -22,6 +22,7 @@ import com.timomcgrath.packstacker.PackStackerUtil;
 import com.timomcgrath.packstacker.PlayerPackCache;
 import com.timomcgrath.packstacker.GeyserDetector;
 import com.timomcgrath.packstacker.AbstractResourcePack;
+import com.timomcgrath.packstacker.PlayerProtectionManager;
 import org.bukkit.Bukkit;
 import java.util.List;
 import org.bukkit.entity.Player;
@@ -63,7 +64,8 @@ public class PackListener implements Listener {
     }
     Bukkit.getLogger().info("PackListener: Sending " + packs.size() + " pack(s) to player " + player.getName() + ": " + names.toString());
 
-    PackStackerUtil.loadMultiple(player, player.getUniqueId(), packs);
+    List<AbstractResourcePack> requested = PackStackerUtil.loadMultiple(player, player.getUniqueId(), packs);
+    PlayerProtectionManager.getInstance().beginProtection(player, requested);
   }
 
   @EventHandler

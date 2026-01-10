@@ -19,6 +19,7 @@
 package com.timomcgrath.packstacker;
 
 import com.timomcgrath.packstacker.listener.PackListener;
+import com.timomcgrath.packstacker.listener.ProtectionListener;
 import net.kyori.adventure.audience.Audience;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -46,6 +47,7 @@ public final class PackStacker extends JavaPlugin implements PackPlugin {
 
         getCommand("pack").setExecutor(new PackCommand(this));
         Bukkit.getPluginManager().registerEvents(new PackListener(), this);
+        Bukkit.getPluginManager().registerEvents(new ProtectionListener(), this);
     }
 
     @Override
