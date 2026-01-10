@@ -54,6 +54,7 @@ public final class PlayerProtectionManager {
         if (!state.active) {
             state.originalInvulnerable = player.isInvulnerable();
             state.originalCollidable = player.isCollidable();
+            player.sendMessage("Đã bật bảo vệ khi tải gói tài nguyên. Bạn tạm thời an toàn trong lúc tải.");
         }
 
         packs.forEach(pack -> state.pendingPackIds.add(pack.getUuid()));
@@ -130,6 +131,7 @@ public final class PlayerProtectionManager {
             Player player = Bukkit.getPlayer(playerId);
             if (player != null) {
                 restore(player, state);
+                player.sendMessage("Đã tắt bảo vệ khi tải gói. Bạn có thể bị sát thương và bị đẩy.");
             }
             states.remove(playerId);
             return;
