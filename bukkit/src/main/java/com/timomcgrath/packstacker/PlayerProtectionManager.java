@@ -113,12 +113,6 @@ public final class PlayerProtectionManager {
         player.setInvulnerable(true);
         player.setCollidable(false);
         player.setFireTicks(0);
-        player.setRemainingAir(player.getMaximumAir());
-    }
-
-    private void maintainSafety(Player player) {
-        player.setFireTicks(0);
-        player.setRemainingAir(player.getMaximumAir());
     }
 
     private void restore(Player player, ProtectionState state) {
@@ -139,7 +133,7 @@ public final class PlayerProtectionManager {
 
         Player player = Bukkit.getPlayer(playerId);
         if (player != null) {
-            maintainSafety(player);
+            player.setFireTicks(0);
         }
     }
 

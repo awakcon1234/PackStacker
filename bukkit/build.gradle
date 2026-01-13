@@ -34,6 +34,12 @@ processResources {
 
 shadowJar {
     archiveFileName = "PackStacker-Bukkit-${project.ext.version}.jar"
+    dependencies {
+        exclude(dependency('net.kyori:adventure-api'))
+        exclude(dependency('net.kyori:adventure-text-minimessage'))
+        exclude(dependency('net.kyori:adventure-text-serializer-legacy'))
+        exclude(dependency('net.kyori:text-api'))
+    }
 }
 
 java.sourceCompatibility = 17

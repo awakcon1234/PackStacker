@@ -72,7 +72,7 @@ public class ProtectionListener implements Listener {
 
         if (PlayerProtectionManager.getInstance().isProtected(player.getUniqueId())) {
             event.setCancelled(true);
-            player.setRemainingAir(player.getMaximumAir());
+            event.setAmount(player.getMaximumAir());
         }
     }
 
