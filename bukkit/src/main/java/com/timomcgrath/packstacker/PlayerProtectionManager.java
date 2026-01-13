@@ -63,12 +63,15 @@ public final class PlayerProtectionManager {
         }
 
         ProtectionState state = states.computeIfAbsent(player.getUniqueId(), id -> new ProtectionState());
+        state.pendingPackIds.clear();
+        state.movementSeen = false;
+        state.allPacksFinished = false;
         if (!state.active) {
             player.sendMessage(mm("🛡 <green>Đã bật chế độ bảo vệ khi tải gói.</green> <gray>Bạn tạm thời an toàn trong lúc tải.</gray>"));
         }
 
         packs.forEach(pack -> state.pendingPackIds.add(pack.getUuid()));
-        state.allPacksFinished = state.pendingPackIds.isEmpty();
+        state.allPacksFinished = false;
         state.active = true;
 
         scheduleFallback(player.getUniqueId(), state);
